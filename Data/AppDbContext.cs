@@ -8,6 +8,9 @@ namespace DeskFlow.API.Data
     {
         // NOTA: O DbSet representa a tabela real no banco de dados. Aqui criamos a tabela de Categorias.
         public DbSet<Categoria> Categorias { get; set; }
+        // NOTA: Agora o banco vai criar essas duas tabelas também.
+        public DbSet<Chamado> Chamados { get; set; }
+        public DbSet<Interacao> Interacoes { get; set; }
 
         // NOTA: O construtor recebe as configurações do banco e passa para a classe base (DbContext).
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -17,7 +20,7 @@ namespace DeskFlow.API.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=DeskFlowDb;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=localhost\\SQLExpress;Database=DeskFlowDb;Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
     }
