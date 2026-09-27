@@ -14,6 +14,8 @@ builder.Services.AddDbContext<AppDbContext>();
 
 // NOTA: Injeção de dependência do Repository. Isso significa: "Sempre que a Controller pedir um CategoriaRepository, crie um novo (Scoped)".
 builder.Services.AddScoped<CategoriaRepository>();
+builder.Services.AddScoped<ChamadoRepository>();
+builder.Services.AddScoped<InteracaoRepository>();
 
 var app = builder.Build();
 
