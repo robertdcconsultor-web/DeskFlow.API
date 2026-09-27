@@ -28,7 +28,7 @@ namespace DeskFlow.API.Controllers
             chamado.DataAbertura = DateTime.Now;
 
             _chamadoRepository.Adicionar(chamado);
-            _interacaoRepository.Adicionar(new Interacao { ChamadoId = chamado.Id, Data = DateTime.Now, Descricao = "Chamado aberto." });
+            _interacaoRepository.Adicionar(new Interacao { ChamadoId = chamado.Id, DataRegistro = DateTime.Now, Autor = "Sistema", Mensagem = "Chamado aberto." });
             return Created("", chamado);
         }
 

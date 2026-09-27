@@ -1,6 +1,7 @@
 using DeskFlow.API.Data;
 using DeskFlow.API.Repositories;
 using Microsoft.EntityFrameworkCore;
+using DeskFlow.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<CategoriaRepository>();
 builder.Services.AddScoped<ChamadoRepository>();
 builder.Services.AddScoped<InteracaoRepository>();
+builder.Services.AddScoped<CategoriaService>();
 
 var app = builder.Build();
 
