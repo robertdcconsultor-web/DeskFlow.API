@@ -68,18 +68,20 @@ namespace DeskFlow.API.Services
 
         public List<Chamado> Listar(string? status, string? prioridade, int? categoriaId)
         {
-            var todosChamados = _chamadoRepository.ObterTodos();
+            var query = _chamadoRepository.ObterQueryable();
 
+            // NOTA: Vamos empilhando os filtros (WHERE) na query SQL, sem ir ao banco de dados ainda.
             if (!string.IsNullOrEmpty(status))
-                todosChamados = todosChamados.Where(c => c.Status == status).ToList();
+                query = query.Where(c => c.Status == status);
 
             if (!string.IsNullOrEmpty(prioridade))
-                todosChamados = todosChamados.Where(c => c.Prioridade == prioridade).ToList();
+                query = query.Where(c => c.Prioridade == prioridade);
 
             if (categoriaId.HasValue)
-                todosChamados = todosChamados.Where(c => c.CategoriaId == categoriaId.Value).ToList();
+                query = query.Where(c => c.CategoriaId == categoriaId.Value);
 
-            return todosChamados;
+            // Apenas aqui, na hora do .ToList(), o Entity Framework traduz tudo para um comando SQL, ex: SELECT * FROM Chamados WHERE Status = 'Aberto' e dispara para o SQL Server, economizando banda e memória RAM!
+            return query.ToList();
         }
 
         public void AdicionarInteracao(int chamadoId, Interacao interacao)

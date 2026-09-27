@@ -1,5 +1,7 @@
 using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
+using Microsoft.EntityFrameworkCore; //Nota: Necessário para usar o Include() no EF Core.
+using System.Linq; //Nota: Necessário para o IQueryable.
 
 namespace DeskFlow.API.Repositories
 {
@@ -21,7 +23,11 @@ namespace DeskFlow.API.Repositories
 
         public Chamado ObterPorId(int id)
         {
-            return _context.Chamados.FirstOrDefault(c => c.Id == id);
+            // O RF11 exige que o chamado venha com sua Categoria e Histórico de Interações.
+            return _context.Chamados
+                .Include(c => c.Categoria)
+                .Include(c => c.Interacoes)
+                .FirstOrDefault(c => c.Id == id);
         }
 
         public void Atualizar(Chamado chamado)
@@ -31,9 +37,10 @@ namespace DeskFlow.API.Repositories
             _context.SaveChanges();
         }
 
-        public List<Chamado> ObterTodos()
+        // NOTA SÊNIOR: O IQueryable não vai no banco na hora. Ele é apenas a "planta baixa" da query SQL.
+        public IQueryable<Chamado> ObterQueryable()
         {
-            return _context.Chamados.ToList();
+            return _context.Chamados.AsQueryable();
         }
     }
 }
