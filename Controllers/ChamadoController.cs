@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using DeskFlow.API.Repositories;
 using DeskFlow.API.Models.Entities;
+using DeskFlow.API.Services;
 using System;
-using System.Linq; //Necessário para uso do .Where() do LINQ.
 
 namespace DeskFlow.API.Controllers
 {
@@ -10,102 +9,79 @@ namespace DeskFlow.API.Controllers
     [Route("api/[controller]")]
     public class ChamadosController : ControllerBase
     {
-        private readonly ChamadoRepository _chamadoRepository;
-        private readonly InteracaoRepository _interacaoRepository;
+        private readonly ChamadoService _service;
 
-        // NOTA: Injetamos agora os dois repositórios necessários na Controller.
-        public ChamadosController(ChamadoRepository chamadoRepository, InteracaoRepository interacaoRepository)
+        // NOTA SÊNIOR: A Controller agora só conhece o Service. Ignora a existência de Repositories.
+        public ChamadosController(ChamadoService service)
         {
-            _chamadoRepository = chamadoRepository;
-            _interacaoRepository = interacaoRepository;
+            _service = service;
         }
 
         [HttpPost]
         public IActionResult AbrirChamado(Chamado chamado)
         {
-            // NOTA: Forçamos o status inicial e a data do sistema para impedir que o utilizador envie via Postman um chamado com status "Fechado" na data de abertura.
-            chamado.Status = "Aberto";
-            chamado.DataAbertura = DateTime.Now;
-
-            _chamadoRepository.Adicionar(chamado);
-            _interacaoRepository.Adicionar(new Interacao { ChamadoId = chamado.Id, DataRegistro = DateTime.Now, Autor = "Sistema", Mensagem = "Chamado aberto." });
+            _service.AbrirChamado(chamado);
             return Created("", chamado);
         }
 
         [HttpGet("{id}")]
         public IActionResult ObterDetalhes(int id)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
+            var chamado = _service.ObterDetalhes(id);
             if (chamado == null) return NotFound();
-            
             return Ok(chamado);
         }
 
-        // NOTA: O método HttpPatch é ideal para atualizações parciais num recurso (neste caso, apenas alterar o Status).
         [HttpPatch("{id}/iniciar")]
         public IActionResult IniciarAtendimento(int id)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
-            if (chamado == null) return NotFound();
-
-            chamado.Status = "EmAndamento";
-            _chamadoRepository.Atualizar(chamado);
-
-            return NoContent();
+            try
+            {
+                _service.IniciarAtendimento(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "Chamado não encontrado.") return NotFound();
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPatch("{id}/encerrar")]
         public IActionResult EncerrarChamado(int id, [FromBody] string solucao)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
-            if (chamado == null) return NotFound();
-
-            if (string.IsNullOrEmpty(solucao))
+            try
             {
-                // NOTA: O RF08 exige texto de solução. Se não for enviado, devolvemos erro 400.
-                return BadRequest("A solução é obrigatória para encerrar o chamado.");
+                _service.EncerrarChamado(id, solucao);
+                return NoContent();
             }
-
-            chamado.Status = "Fechado";
-            chamado.Solucao = solucao;
-            chamado.DataFechamento = DateTime.Now;
-
-            _chamadoRepository.Atualizar(chamado);
-            return NoContent();
+            catch (Exception ex)
+            {
+                if (ex.Message == "Chamado não encontrado.") return NotFound();
+                return BadRequest(ex.Message);
+            }
         }
 
-        // RF12: Listagem com Filtros Dinâmicos
         [HttpGet]
         public IActionResult Listar([FromQuery] string? status, [FromQuery] string? prioridade, [FromQuery] int? categoriaId)
         {
-            var todosChamados = _chamadoRepository.ObterTodos();
-
-            if (!string.IsNullOrEmpty(status))
-                todosChamados = todosChamados.Where(c => c.Status == status).ToList();
-
-            if (!string.IsNullOrEmpty(prioridade))
-                todosChamados = todosChamados.Where(c => c.Prioridade == prioridade).ToList();
-
-            if (categoriaId.HasValue)
-                todosChamados = todosChamados.Where(c => c.CategoriaId == categoriaId.Value).ToList();
-
-            return Ok(todosChamados);
+            var chamados = _service.Listar(status, prioridade, categoriaId);
+            return Ok(chamados);
         }
 
-        // RF10: Adicionar Interação
         [HttpPost("{id}/interacoes")]
         public IActionResult AdicionarInteracao(int id, Interacao interacao)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
-            if (chamado == null) return NotFound("Chamado não encontrado.");
-
-            // NOTA: Associamos o ID do chamado à interação para o banco de dados fazer a ligação (Foreign Key).
-            interacao.ChamadoId = id;
-            interacao.DataRegistro = DateTime.Now;
-
-            _interacaoRepository.Adicionar(interacao);
-
-            return Created("", interacao);
+            try
+            {
+                _service.AdicionarInteracao(id, interacao);
+                return Created("", interacao);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "Chamado não encontrado.") return NotFound();
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
