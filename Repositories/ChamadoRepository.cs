@@ -2,6 +2,7 @@ using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
 using Microsoft.EntityFrameworkCore; //Nota: Necessário para usar o Include() no EF Core.
 using System.Linq; //Nota: Necessário para o IQueryable.
+using System.Threading.Tasks;
 
 namespace DeskFlow.API.Repositories
 {
@@ -15,29 +16,30 @@ namespace DeskFlow.API.Repositories
             _context = context;
         }
 
-        public void Adicionar(Chamado chamado)
+        public async Task AdicionarAsync(Chamado chamado)
         {
-            _context.Chamados.Add(chamado);
-            _context.SaveChanges();
+            await _context.Chamados.AddAsync(chamado);
+            await _context.SaveChangesAsync();
         }
 
-        public Chamado ObterPorId(int id)
+        public async Task<Chamado> ObterPorIdAsync(int id)
         {
             // O RF11 exige que o chamado venha com sua Categoria e Histórico de Interações.
-            return _context.Chamados
+            return await _context.Chamados
                 .Include(c => c.Categoria)
                 .Include(c => c.Interacoes)
-                .FirstOrDefault(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public void Atualizar(Chamado chamado)
+        public async Task AtualizarAsync(Chamado chamado)
         {
-            // NOTA: O Update marca o registo como modificado para o EF Core atualizar todos os campos no banco.
+            // NOTA: O Update marca o registo como modificado para o EF Core atualizar todos os campos no banco. Não tem versão Async
             _context.Chamados.Update(chamado);
-            _context.SaveChanges();
+            // O SaveChanges é quem efetivamente dispara o comando SQL, por isso ele é "awaitable".
+            await _context.SaveChangesAsync();
         }
 
-        // NOTA SÊNIOR: O IQueryable não vai no banco na hora. Ele é apenas a "planta baixa" da query SQL.
+        // NOTA: O IQueryable não vai no banco na hora. Ele é apenas a "planta baixa" da query SQL.
         public IQueryable<Chamado> ObterQueryable()
         {
             return _context.Chamados.AsQueryable();

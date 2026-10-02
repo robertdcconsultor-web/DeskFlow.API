@@ -3,8 +3,7 @@ using DeskFlow.API.Models.Entities;
 
 namespace DeskFlow.API.Repositories
 {
-    // NOTA: O repositório serve para centralizar todos os comandos de banco de dados num lugar só.
-    // Assim não espalhamos SQL pelo projeto todo.
+    // NOTA: O repositório serve para centralizar todos os comandos de banco de dados num lugar só. Assim não espalhamos SQL pelo projeto todo.
     public class CategoriaRepository
     {
         private readonly AppDbContext _context;

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using DeskFlow.API.Models.Entities;
 using DeskFlow.API.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace DeskFlow.API.Controllers
 {
@@ -18,26 +19,26 @@ namespace DeskFlow.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult AbrirChamado(Chamado chamado)
+        public async Task<IActionResult> AbrirChamado(Chamado chamado)
         {
-            _service.AbrirChamado(chamado);
+            await _service.AbrirChamadoAsync(chamado);
             return Created("", chamado);
         }
 
         [HttpGet("{id}")]
-        public IActionResult ObterDetalhes(int id)
+        public async Task<IActionResult> ObterDetalhes(int id)
         {
-            var chamado = _service.ObterDetalhes(id);
+            var chamado = await _service.ObterDetalhesAsync(id);
             if (chamado == null) return NotFound();
             return Ok(chamado);
         }
 
         [HttpPatch("{id}/iniciar")]
-        public IActionResult IniciarAtendimento(int id)
+        public async Task<IActionResult> IniciarAtendimento(int id)
         {
             try
             {
-                _service.IniciarAtendimento(id);
+                await _service.IniciarAtendimentoAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -48,11 +49,11 @@ namespace DeskFlow.API.Controllers
         }
 
         [HttpPatch("{id}/encerrar")]
-        public IActionResult EncerrarChamado(int id, [FromBody] string solucao)
+        public async Task<IActionResult> EncerrarChamado(int id, [FromBody] string solucao)
         {
             try
             {
-                _service.EncerrarChamado(id, solucao);
+                await _service.EncerrarChamadoAsync(id, solucao);
                 return NoContent();
             }
             catch (Exception ex)
@@ -63,18 +64,18 @@ namespace DeskFlow.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult Listar([FromQuery] string? status, [FromQuery] string? prioridade, [FromQuery] int? categoriaId)
+        public async Task<IActionResult> Listar([FromQuery] string? status, [FromQuery] string? prioridade, [FromQuery] int? categoriaId)
         {
-            var chamados = _service.Listar(status, prioridade, categoriaId);
+            var chamados = await _service.ListarAsync(status, prioridade, categoriaId);
             return Ok(chamados);
         }
 
         [HttpPost("{id}/interacoes")]
-        public IActionResult AdicionarInteracao(int id, Interacao interacao)
+        public async Task<IActionResult> AdicionarInteracao(int id, Interacao interacao)
         {
             try
             {
-                _service.AdicionarInteracao(id, interacao);
+                await _service.AdicionarInteracaoAsync(id, interacao);
                 return Created("", interacao);
             }
             catch (Exception ex)

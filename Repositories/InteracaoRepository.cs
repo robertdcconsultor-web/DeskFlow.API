@@ -1,5 +1,6 @@
 using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
+using System.Threading.Tasks; //NOTA: Necessário para usar o Task
 
 namespace DeskFlow.API.Repositories
 {
@@ -13,10 +14,12 @@ namespace DeskFlow.API.Repositories
             _context = context;
         }
 
-        public void Adicionar(Interacao interacao)
+        //CORREÇÃO: Método agora retorna TASK e usa o sufixo Async
+        public async Task AdicionarAsync(Interacao interacao)
         {
-            _context.Interacoes.Add(interacao);
-            _context.SaveChanges();
+            //NOTA: AddAsync  SaveChangesAsync liberam a thread do servidor
+            await _context.Interacoes.AddAsync(interacao);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -3,6 +3,9 @@ using DeskFlow.API.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore; //NOTA: Necessário para o ToListAsync
+using System.Threading.Tasks;
+using System.Runtime.Intrinsics.Arm;
 
 namespace DeskFlow.API.Services
 {
@@ -18,15 +21,16 @@ namespace DeskFlow.API.Services
             _interacaoRepository = interacaoRepository;
         }
 
-        public void AbrirChamado(Chamado chamado)
+        public async Task AbrirChamadoAsync(Chamado chamado)
         {
             chamado.Status = "Aberto";
             chamado.DataAbertura = DateTime.Now;
 
-            _chamadoRepository.Adicionar(chamado);
+            //NOTA: Aguardamos a gravação do chamado no BD
+            await _chamadoRepository.AdicionarAsync(chamado);
             
             // CORREÇÃO: A criação automática de interação também centralizada aqui.
-            _interacaoRepository.Adicionar(new Interacao { 
+            await _interacaoRepository.AdicionarAsync(new Interacao { 
                 ChamadoId = chamado.Id, 
                 DataRegistro = DateTime.Now, 
                 Autor = "Sistema",
@@ -34,23 +38,23 @@ namespace DeskFlow.API.Services
             });
         }
 
-        public Chamado ObterDetalhes(int id)
+        public async Task<Chamado?> ObterDetalhesAsync(int id)
         {
-            return _chamadoRepository.ObterPorId(id);
+            return await _chamadoRepository.ObterPorIdAsync(id);
         }
 
-        public void IniciarAtendimento(int id)
+        public async Task IniciarAtendimentoAsync(int id)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
+            var chamado = await _chamadoRepository.ObterPorIdAsync(id);
             if (chamado == null) throw new Exception("Chamado não encontrado.");
 
             chamado.Status = "EmAndamento";
-            _chamadoRepository.Atualizar(chamado);
+            await _chamadoRepository.AtualizarAsync(chamado);
         }
 
-        public void EncerrarChamado(int id, string solucao)
+        public async Task EncerrarChamadoAsync(int id, string solucao)
         {
-            var chamado = _chamadoRepository.ObterPorId(id);
+            var chamado = await _chamadoRepository.ObterPorIdAsync(id);
             if (chamado == null) throw new Exception("Chamado não encontrado.");
 
             // CORREÇÃO: Validação de negócio no Service, não na Controller.
@@ -63,10 +67,10 @@ namespace DeskFlow.API.Services
             chamado.Solucao = solucao;
             chamado.DataFechamento = DateTime.Now;
 
-            _chamadoRepository.Atualizar(chamado);
+            await _chamadoRepository.AtualizarAsync(chamado);
         }
 
-        public List<Chamado> Listar(string? status, string? prioridade, int? categoriaId)
+        public async Task<List<Chamado>> ListarAsync(string? status, string? prioridade, int? categoriaId)
         {
             //Correção
             var query = _chamadoRepository.ObterQueryable();
@@ -82,12 +86,12 @@ namespace DeskFlow.API.Services
                 query = query.Where(c => c.CategoriaId == categoriaId.Value);
 
             // Apenas aqui, na hora do .ToList(), o Entity Framework traduz tudo para um comando SQL, ex: SELECT * FROM Chamados WHERE Status = 'Aberto' e dispara para o SQL Server, economizando banda e memória RAM!
-            return query.ToList();
+            return await query.ToListAsync();
         }
 
-        public void AdicionarInteracao(int chamadoId, Interacao interacao)
+        public async Task AdicionarInteracaoAsync(int chamadoId, Interacao interacao)
         {
-            var chamado = _chamadoRepository.ObterPorId(chamadoId);
+            var chamado = await _chamadoRepository.ObterPorIdAsync(chamadoId);
             if (chamado == null) throw new Exception("Chamado não encontrado.");
 
             // CORREÇÃO: Implementada a trava de segurança exigida pelo RF10! Não permitimos inserir comentários em chamados fechados.
@@ -99,7 +103,7 @@ namespace DeskFlow.API.Services
             interacao.ChamadoId = chamadoId;
             interacao.DataRegistro = DateTime.Now;
 
-            _interacaoRepository.Adicionar(interacao);
+            await _interacaoRepository.AdicionarAsync(interacao);
         }
     }
 }
