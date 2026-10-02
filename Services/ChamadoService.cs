@@ -68,6 +68,7 @@ namespace DeskFlow.API.Services
 
         public List<Chamado> Listar(string? status, string? prioridade, int? categoriaId)
         {
+            //Correção
             var query = _chamadoRepository.ObterQueryable();
 
             // NOTA: Vamos empilhando os filtros (WHERE) na query SQL, sem ir ao banco de dados ainda.

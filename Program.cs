@@ -22,6 +22,9 @@ builder.Services.AddScoped<ChamadoService>();
 
 var app = builder.Build();
 
+// NOTA: Adicionamos o Middleware Global de Erros no pipeline de execução.
+app.UseMiddleware<DeskFlow.API.Middlewares.ExceptionHandlingMiddleware>();
+
 // NOTA: Ativa a página do Swagger para podermos testar a API no navegador.
 if (app.Environment.IsDevelopment())
 {
