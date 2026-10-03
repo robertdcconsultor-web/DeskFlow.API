@@ -3,6 +3,7 @@ using DeskFlow.API.Models.Entities;
 using DeskFlow.API.Services;
 using System;
 using System.Threading.Tasks;
+using DeskFlow.API.Models.Enums; // Adicionado para enxergar os Enums
 
 namespace DeskFlow.API.Controllers
 {
@@ -64,7 +65,7 @@ namespace DeskFlow.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Listar([FromQuery] string? status, [FromQuery] string? prioridade, [FromQuery] int? categoriaId)
+        public async Task<IActionResult> Listar([FromQuery] StatusEnum? status, [FromQuery] PrioridadeEnum? prioridade, [FromQuery] int? categoriaId)
         {
             var chamados = await _service.ListarAsync(status, prioridade, categoriaId);
             return Ok(chamados);

@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore; //NOTA: Necessário para o ToListAsync
 using System.Threading.Tasks;
 using System.Runtime.Intrinsics.Arm;
+using DeskFlow.API.Models.Enums; // Adicionado para enxergar os Enums
 
 namespace DeskFlow.API.Services
 {
@@ -23,7 +24,7 @@ namespace DeskFlow.API.Services
 
         public async Task AbrirChamadoAsync(Chamado chamado)
         {
-            chamado.Status = "Aberto";
+            chamado.Status = StatusEnum.Aberto; // Substituiu a string "Aberto"
             chamado.DataAbertura = DateTime.Now;
 
             //NOTA: Aguardamos a gravação do chamado no BD
@@ -48,7 +49,7 @@ namespace DeskFlow.API.Services
             var chamado = await _chamadoRepository.ObterPorIdAsync(id);
             if (chamado == null) throw new Exception("Chamado não encontrado.");
 
-            chamado.Status = "EmAndamento";
+            chamado.Status = StatusEnum.EmAndamento; // Substituiu a string
             await _chamadoRepository.AtualizarAsync(chamado);
         }
 
@@ -63,30 +64,29 @@ namespace DeskFlow.API.Services
                 throw new Exception("A solução é obrigatória para encerrar o chamado.");
             }
 
-            chamado.Status = "Fechado";
+            chamado.Status = StatusEnum.Fechado; // Substituiu a string
             chamado.Solucao = solucao;
             chamado.DataFechamento = DateTime.Now;
 
             await _chamadoRepository.AtualizarAsync(chamado);
         }
 
-        public async Task<List<Chamado>> ListarAsync(string? status, string? prioridade, int? categoriaId)
+        public async Task<List<Chamado>> ListarAsync(StatusEnum? status, PrioridadeEnum? prioridade, int? categoriaId)
         {
-            //Correção
+            //Correção - NOTA: Vamos empilhando os filtros (WHERE) na query SQL, sem ir ao banco de dados ainda.
             var query = _chamadoRepository.ObterQueryable();
 
-            // NOTA: Vamos empilhando os filtros (WHERE) na query SQL, sem ir ao banco de dados ainda.
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(c => c.Status == status);
+            if (status.HasValue)
+                query = query.Where(c => c.Status == status.Value);
 
-            if (!string.IsNullOrEmpty(prioridade))
-                query = query.Where(c => c.Prioridade == prioridade);
+            if (prioridade.HasValue)
+                query = query.Where(c => c.Prioridade == prioridade.Value);
 
             if (categoriaId.HasValue)
                 query = query.Where(c => c.CategoriaId == categoriaId.Value);
 
             // Apenas aqui, na hora do .ToList(), o Entity Framework traduz tudo para um comando SQL, ex: SELECT * FROM Chamados WHERE Status = 'Aberto' e dispara para o SQL Server, economizando banda e memória RAM!
-            return await query.ToListAsync();
+            return await query.ToListAsync(); 
         }
 
         public async Task AdicionarInteracaoAsync(int chamadoId, Interacao interacao)
@@ -95,7 +95,7 @@ namespace DeskFlow.API.Services
             if (chamado == null) throw new Exception("Chamado não encontrado.");
 
             // CORREÇÃO: Implementada a trava de segurança exigida pelo RF10! Não permitimos inserir comentários em chamados fechados.
-            if (chamado.Status == "Fechado")
+            if (chamado.Status == StatusEnum.Fechado) // A trava de segurança agora compara Enums
             {
                 throw new Exception("Não é permitido adicionar interações em um chamado fechado.");
             }

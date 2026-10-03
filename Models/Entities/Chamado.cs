@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using DeskFlow.API.Models.Enums; // Adicionado para enxergar os Enums
 
 namespace DeskFlow.API.Models.Entities
 {
@@ -20,11 +21,11 @@ namespace DeskFlow.API.Models.Entities
         
         [Required]
         [MaxLength(20)]
-        public string Prioridade { get; set; } 
+        public PrioridadeEnum Prioridade { get; set; } // CORREÇÃO (Erros 8 e 9): Usando Enums para garantir a integridade.
         
         [Required]
         [MaxLength(20)]
-        public string Status { get; set; } 
+        public StatusEnum Status { get; set; } // CORREÇÃO (Erros 10 e 11): Usando Enums para garantir a integridade.
         
         [Required(ErrorMessage = "O nome do solicitante é obrigatório.")]
         [MaxLength(100)]
