@@ -1,5 +1,9 @@
 using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
+using Microsoft.EntityFrameworkCore; //Nota: Necessário para usar o Include() no EF Core e ToListAsync.
+using System.Linq; //Nota: Necessário para o IQueryable.
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DeskFlow.API.Repositories
 {
@@ -14,30 +18,34 @@ namespace DeskFlow.API.Repositories
             _context = context;
         }
 
-        public List<Categoria> ObterTodas()
+        //CORREÇÃO: Transição para o modelo Assincrono
+        public async Task<List<Categoria>> ObterTodasAsync()
         {
             // NOTA: O ToList() vai lá no banco, faz um SELECT * e transforma numa lista do C#.
-            return _context.Categorias.ToList();
+            return await _context.Categorias.ToListAsync();
         }
 
-        public Categoria ObterPorId(int id)
+        public async Task<Categoria?> ObterPorIdAsync(int id)
         {
-            // NOTA: O Find procura pelo Id. Se não achar, retorna null.
-            return _context.Categorias.Find(id);
+            // NOTA: O Find procura pelo Id. Se não achar, retorna null. Precisamos do Include (c => c.Chamados)para que a validação de exclusão no Service consiga contar se existem chamados vinculados.
+            return await _context.Categorias
+                .Include(c => c.Chamados)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public void Adicionar(Categoria categoria)
+        public async Task AdicionarAsync(Categoria categoria)
         {
             // NOTA: O Add só coloca na memória do Entity Framework.
-            _context.Categorias.Add(categoria);
+            await _context.Categorias.AddAsync(categoria);
             // NOTA: O SaveChanges é o que realmente faz o INSERT no banco de dados. Sem ele, nada é salvo!
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Deletar(Categoria categoria)
+        public async Task DeletarAsync(Categoria categoria)
         {
+            // NOTA: O método Remove do EF Core é apenas de memória (síncrono), a ida ao banco acontece apenas no SaveChangesAsync.
             _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }

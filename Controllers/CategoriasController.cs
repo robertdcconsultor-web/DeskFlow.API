@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DeskFlow.API.Models.Entities;
 using DeskFlow.API.Services; // Adicionado para enxergar o Service
+using System.Threading.Tasks; //Necessário para retornar Task<IAActionsResult>
 
 namespace DeskFlow.API.Controllers
 {
@@ -19,29 +20,29 @@ namespace DeskFlow.API.Controllers
 
         // NOTA: HttpGet significa que esse endpoint atende requisições do tipo GET (para buscar dados).
         [HttpGet]
-        public IActionResult Listar()
+        public async Task<IActionResult> Listar()
         {
-            var categorias = _service.ObterTodas();
+            var categorias = await _service.ObterTodasAsync();
             // NOTA: Retornamos Ok() que representa o Status 200 HTTP.
             return Ok(categorias);
         }
 
         [HttpPost]
-        public IActionResult Cadastrar(Categoria categoria)
+        public async Task<IActionResult> Cadastrar(Categoria categoria)
         {
             // NOTA: HttpPost é usado para criar novos recursos.
-            _service.Adicionar(categoria);
+            await _service.AdicionarAsync(categoria);
             // NOTA: Retorno 201 Created indica sucesso na criação.
             return Created("", categoria);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Deletar(int id)
+        public async Task<IActionResult> Deletar(int id)
         {
             // CORREÇÃO: A Controller ficou extremamente limpa (Lean Controller). Ela apenas chama a ação. Se a regra de negócio falhar, o erro estoura no bloco try/catch.
             try
             {
-                _service.Deletar(id);
+                await _service.DeletarAsync(id);
                 return NoContent(); // Status 204
             }
             catch (System.Exception ex)

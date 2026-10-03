@@ -1,5 +1,9 @@
 using DeskFlow.API.Models.Entities;
 using DeskFlow.API.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Formats.Asn1;
+using System.Threading.Tasks;
 
 namespace DeskFlow.API.Services
 {
@@ -13,36 +17,37 @@ namespace DeskFlow.API.Services
             _repository = repository;
         }
 
-        public List<Categoria> ObterTodas()
+        public async Task<List<Categoria>> ObterTodasAsync()
         {
-            return _repository.ObterTodas();
+            return await _repository.ObterTodasAsync();
         }
 
-        public Categoria ObterPorId(int id)
+        public async Task<Categoria> ObterPorIdAsync(int id)
         {
-            return _repository.ObterPorId(id);
+            return await _repository.ObterPorIdAsync(id);
         }
 
-        public void Adicionar(Categoria categoria)
+        public async Task AdicionarAsync(Categoria categoria)
         {
-            _repository.Adicionar(categoria);
+            await _repository.AdicionarAsync(categoria);
         }
 
-        public void Deletar(int id)
+        public async Task DeletarAsync(int id)
         {
-            var categoria = _repository.ObterPorId(id);
+            var categoria = await _repository.ObterPorIdAsync(id);
             if (categoria == null)
             {
                 // NOTA: Lançamos uma exceção aqui. A Controller ou o Middleware vai capturar isso depois.
                 throw new Exception("Categoria não encontrada.");
             }
 
+            // A regra de negócio continua protegida, mas agora roda de forma assíncrona
             if (categoria.Chamados != null && categoria.Chamados.Count > 0)
             {
                 throw new Exception("Não é possível deletar uma categoria que possui chamados.");
             }
 
-            _repository.Deletar(categoria);
+            await _repository.DeletarAsync(categoria);
         }
     }
 }
