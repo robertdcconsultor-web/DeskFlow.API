@@ -22,6 +22,18 @@ builder.Services.AddScoped<InteracaoRepository>();
 builder.Services.AddScoped<CategoriaService>();
 builder.Services.AddScoped<ChamadoService>();
 
+// NOTA: Configuração de CORS. Libera a API para ser acessada por qualquer Front-End. 
+// Em produção, substituiríamos AllowAnyOrigin pelo domínio exato da empresa (ex: helpdesk.empresa.com.br).
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTudo", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // NOTA: Adicionamos o Middleware Global de Erros no pipeline de execução.
@@ -35,6 +47,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// CORREÇÃO: Ativa a política de CORS que criamos acima.
+app.UseCors("PermitirTudo");
 app.UseAuthorization();
 app.MapControllers();
 
