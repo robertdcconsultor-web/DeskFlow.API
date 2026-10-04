@@ -20,11 +20,11 @@ namespace DeskFlow.API.Models.Entities
         
         
         [Required]
-        [MaxLength(20)]
+        //[MaxLength(20)] // CORREÇÃO: Removemos o MaxLength porque Enums não são textos.
         public PrioridadeEnum Prioridade { get; set; } // CORREÇÃO (Erros 8 e 9): Usando Enums para garantir a integridade.
         
         [Required]
-        [MaxLength(20)]
+        //[MaxLength(20)] // CORREÇÃO: Removemos o MaxLength porque Enums não são textos.
         public StatusEnum Status { get; set; } // CORREÇÃO (Erros 10 e 11): Usando Enums para garantir a integridade.
         
         [Required(ErrorMessage = "O nome do solicitante é obrigatório.")]

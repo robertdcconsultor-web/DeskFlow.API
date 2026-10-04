@@ -12,7 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // NOTA: Precisamos avisar o sistema que vamos usar o Controllers.
 builder.Services.AddControllers()
     .AddJsonOptions(options => 
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        // CORREÇÃO: Evita o loop infinito ao serializar Entidades relacionadas (Chamado <-> Interacao)
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 // NOTA: Configuração do Swagger para aceitar o Token JWT na interface gráfica
