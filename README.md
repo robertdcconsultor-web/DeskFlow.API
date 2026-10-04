@@ -1,25 +1,27 @@
 # 🎧 DeskFlow API — Gestão de Chamados e Helpdesk de TI
 
 ## 🎯 Sobre o Projeto
-A **DeskFlow API** é uma Web API RESTful construída em .NET Core 10 utilizando Entity Framework Core e SQL Server. O sistema automatiza o gerenciamento de chamados de suporte técnico, histórico de interações e acompanhamento de status do atendimento.
+A **DeskFlow API** é uma Web API RESTful construída em .NET 10 utilizando Entity Framework Core e SQL Server. O sistema automatiza o gerenciamento de chamados de suporte técnico, histórico de interações e acompanhamento de status do atendimento.
 
 Este projeto foi desenvolvido como avaliação final do Módulo 01 por **Robert Diório Campos**, aplicando conceitos sólidos de arquitetura em camadas, injeção de dependência e tratamento global de exceções.
 
 ## 🛠️ Tecnologias Utilizadas
-- .NET Core 10 / Web API
+- .NET 10 / Web API
 - Entity Framework Core 10
 - SQL Server (LocalDB / Express)
 - Swagger / OpenAPI para documentação de endpoints
+- Autenticação JWT (JSON Web Token)
 - Arquitetura em Camadas (Controllers, Services, Repositories)
 
-## 🚀 Como Executar a Aplicação
+## 🚀 Como Executar e Testar a Aplicação
 
 ### Pré-requisitos
 - .NET SDK 10 (ou superior)
 - SQL Server em execução na máquina local
-- Ferramenta global do EF Core (`dotnet tool install --global dotnet-ef`)
+- Ferramenta global do EF Core (instalada via `dotnet tool install --global dotnet-ef`)
 
 ### Passo a Passo
+
 1. **Clone este repositório:**
    ```bash
    git clone [https://github.com/robertdcconsultor-web/DeskFlow.API.git](https://github.com/robertdcconsultor-web/DeskFlow.API.git)
@@ -48,6 +50,25 @@ Este projeto foi desenvolvido como avaliação final do Módulo 01 por **Robert 
 6. **Acesse a documentação do Swagger para testar os endpoints:**
     Abra no navegador: http://localhost:5000/swagger ou https://localhost:7001/swagger (verifique a porta gerada no seu terminal).
 
+🔐 Autenticação e Segurança (JWT)
+O sistema possui bloqueio de rotas. Para consumir os endpoints de Chamados e Categorias, é necessário gerar um token de acesso:
+
+1. No Swagger, acesse a rota POST /api/Auth/login.
+
+2. Envie o seguinte payload (Mock de administrador):
+   ```bash
+    {
+        "usuario": "admin",
+        "senha": "admin123"
+    }
+
+3. Copie o Token gerado na resposta.
+
+4. Clique no botão verde Authorize no topo do Swagger.
+
+5. Digite a palavra Bearer, dê um espaço e cole o token (Exemplo: Bearer eyJhbGci...).
+
+6. Clique em Authorize. Agora as rotas estão liberadas para teste!
 
 ## 🧠 Ciclo de Vida do Chamado
 
@@ -67,7 +88,7 @@ Este projeto foi desenvolvido como avaliação final do Módulo 01 por **Robert 
 
 - Middlewares: Implementação de ExceptionHandlingMiddleware para tratamento e padronização de erros globais sem vazar o Stack Trace.
 
-- Integridade: Uso de Data Annotations e Enums para garantir que dados inconsistentes não cheguem ao banco de dados.   
+- Integridade: Uso de Data Annotations e Enums para garantir que dados inconsistentes não cheguem ao banco de dados. Configuração de ReferenceHandler.IgnoreCycles para evitar loops de serialização JSON em entidades relacionadas.  
 
 ## 🎥 Vídeo de Apresentação
 👉 [INSERIR LINK DO SEU VÍDEO DO YOUTUBE/DRIVE AQUI] 👈
