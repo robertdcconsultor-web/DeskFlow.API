@@ -91,4 +91,4 @@ O sistema possui bloqueio de rotas. Para consumir os endpoints de Chamados e Cat
 - Integridade: Uso de Data Annotations e Enums para garantir que dados inconsistentes não cheguem ao banco de dados. Configuração de ReferenceHandler.IgnoreCycles para evitar loops de serialização JSON em entidades relacionadas.  
 
 ## 🎥 Vídeo de Apresentação
-👉 [INSERIR LINK DO SEU VÍDEO DO YOUTUBE/DRIVE AQUI] 👈
+👉 [[https://drive.google.com/file/d/1F_L9LOhT_UlI4dnA7snILHlvRDsDUhvF/view?usp=drive_link](https://drive.google.com/file/d/1F_L9LOhT_UlI4dnA7snILHlvRDsDUhvF/view?usp=drive_link)] 👈
