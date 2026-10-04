@@ -4,9 +4,11 @@ using DeskFlow.API.Services;
 using System;
 using System.Threading.Tasks;
 using DeskFlow.API.Models.Enums; // Adicionado para enxergar os Enums
+using Microsoft.AspNetCore.Authorization; //NOTA: Biblioteca de Segurança.
 
 namespace DeskFlow.API.Controllers
 {
+    [Authorize] // CORREÇÃO (RNF05): Tranca a porta! Agora a Controller inteira exige o token JWT.
     [ApiController]
     [Route("api/[controller]")]
     public class ChamadosController : ControllerBase

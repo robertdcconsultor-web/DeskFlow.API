@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using DeskFlow.API.Models.Entities;
 using DeskFlow.API.Services; // Adicionado para enxergar o Service
 using System.Threading.Tasks; //Necessário para retornar Task<IAActionsResult>
+using Microsoft.AspNetCore.Authorization; //NOTA: Biblioteca de Segurança.
 
 namespace DeskFlow.API.Controllers
 {
+    [Authorize] // CORREÇÃO (RNF05): Ninguém mexe em categorias sem estar autenticado.
     // NOTA: O ApiController ativa comportamentos automáticos do .NET. O Route define a URL base. O [controller] é substituído pelo nome da classe, então a rota vai ser: /api/categorias
     [ApiController]
     [Route("api/[controller]")]
